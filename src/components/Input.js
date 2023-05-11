@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components/native";
-import { addHouse } from "../Action";
+import { addHouse, updateHouse } from "../Action";
 import { TouchableOpacity, View } from "react-native";
 import { connect } from "react-redux";
 import { Component } from "react";
@@ -18,6 +18,8 @@ const initialState = {
   regDate: "",
   date: new Date(),
   visible: false,
+  flag: true,
+  index: -1,
 };
 
 const Container = styled.View`
@@ -70,6 +72,15 @@ class Input extends Component {
     this.props.dispatechAddHouse(this.state);
     this.setState(initialState);
   };
+
+  selectHouse = () => {
+    this.props.dispatchSelectHouse(this.state);
+  };
+
+  updateHouse = () => {
+    this.props.dispatchUpdateHouse(this.state);
+    this.setState(initialState);
+  };
   onDate = () => {
     this.setState({ visible: true });
   };
@@ -85,12 +96,25 @@ class Input extends Component {
 
   render() {
     const { update, idx, houses } = this.props;
+    const flag = (update && this.state.flag) || this.state.index != idx;
+    console.log(houses[idx]);
+
+    if (flag) {
+      this.setState({ index: idx });
+      this.setState({ division: houses[idx].division });
+      this.setState({ money: houses[idx].money });
+      this.setState({ detail: houses[idx].detail });
+      this.setState({ kind: houses[idx].kind });
+      this.setState({ regDate: houses[idx].regDate });
+      this.setState({ flag: false });
+    }
+
     return (
       <Container>
         <InputWrap>
           <RadioButton.Group
             onValueChange={(value) => this.updateInput("division", value)}
-            value={this.state.division}
+            value={flag ? houses[idx].division : this.state.division}
           >
             <View
               style={{ flexDirection: "row", justifyContent: "space-between" }}
@@ -109,26 +133,29 @@ class Input extends Component {
           </RadioButton.Group>
           <InputText
             placeholder="금액"
-            value={this.state.money}
+            value={flag ? houses[idx].money : this.state.money}
             onChangeText={(value) => this.updateInput("money", value)}
           />
           <InputText
             placeholder="내역"
-            value={this.state.detail}
+            value={flag ? houses[idx].detail : this.state.detail}
             onChangeText={(value) => this.updateInput("detail", value)}
           />
           <InputText
             placeholder="분류"
-            value={this.state.kind}
+            value={flag ? houses[idx].kind : this.state.kind}
             onChangeText={(value) => this.updateInput("kind", value)}
           />
           <Pressable onPress={this.onDate}>
             <Text>
-              {format(new Date(this.state.date), "PPP", { locale: ko })}
+              날짜선택 :
+              {flag
+                ? houses[idx].regDate
+                : format(new Date(this.state.date), "PPP", { locale: ko })}
             </Text>
           </Pressable>
         </InputWrap>
-        <TouchableOpacity onPress={this.addHouse}>
+        <TouchableOpacity onPress={update ? this.updateHouse : this.addHouse}>
           <Button>
             {console.log(update)}
             <ButtonText>{update === true ? "수정" : "등록"}</ButtonText>
@@ -154,5 +181,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = {
   dispatechAddHouse: (house) => addHouse(house),
+  dispatchSelectHouse: (house) => selectHouse(house),
+  dispatchUpdateHouse: (house) => updateHouse(house),
 };
 export default connect(mapStateToProps, mapDispatchToProps)(Input);

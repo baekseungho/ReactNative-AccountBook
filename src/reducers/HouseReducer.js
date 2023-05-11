@@ -1,4 +1,4 @@
-import { ADD_HOUSE, REMOVE_HOUSE, SELECT_HOUSE } from "../Action";
+import { ADD_HOUSE, REMOVE_HOUSE, SELECT_HOUSE, UPDATE_HOUSE } from "../Action";
 import uuid from "react-native-uuid";
 
 const initialState = {
@@ -7,7 +7,7 @@ const initialState = {
   houses: [
     {
       division: "지출",
-      money: 1700,
+      money: "1700",
       detail: "맛동산",
       kind: "간식",
       regDate: "23-05-01",
@@ -18,17 +18,20 @@ const initialState = {
 
 const HouseReducer = (state = initialState, action) => {
   switch (action.type) {
+    case UPDATE_HOUSE:
+      state.houses[action.house.index] = action.house;
+      return { update: false, idx: -1, houses: state.houses };
     case SELECT_HOUSE: {
-      state.idx = state.houses.findIndex(
+      const sel_idx = state.houses.findIndex(
         (house) => house.id === action.house.id
       );
-      state.update = true;
-      return state;
+      return { update: true, idx: sel_idx, houses: state.houses };
     }
     case ADD_HOUSE:
-      state.update = false;
-      state.idx = -1;
+      action.house.flag = true;
       return {
+        update: false,
+        idx: -1,
         houses: [...state.houses, action.house],
       };
     case REMOVE_HOUSE:
@@ -36,6 +39,8 @@ const HouseReducer = (state = initialState, action) => {
         (house) => house.id === action.house.id
       );
       return {
+        update: false,
+        idx: -1,
         houses: [
           ...state.houses.slice(0, index),
           ...state.houses.slice(index + 1),

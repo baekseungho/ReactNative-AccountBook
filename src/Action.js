@@ -29,6 +29,6 @@ export function removeHouse(house) {
 export function updateHouse(house) {
   return {
     type: UPDATE_HOUSE,
-    house,
+    house: { ...house, id: uuid.v4() },
   };
 }
